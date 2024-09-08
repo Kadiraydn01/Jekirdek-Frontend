@@ -1,1 +1,0 @@
-# Jekirdek-Frontend
