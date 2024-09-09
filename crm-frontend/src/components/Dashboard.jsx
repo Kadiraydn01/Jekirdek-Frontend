@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import Modal from './Modal'; // Import the Modal component
 
 function Dashboard() {
   const [customers, setCustomers] = useState([]);
@@ -9,12 +10,11 @@ function Dashboard() {
   const [editMode, setEditMode] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState(null);
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', region: '' });
-  const [userId, setUserId] = useState(null);  // Store the logged-in user ID
+  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch logged-in user ID from local storage
-    const loggedInUserId = localStorage.getItem('userId');  // Replace with your method of getting user ID
+    const loggedInUserId = localStorage.getItem('userId');
     setUserId(loggedInUserId);
 
     const fetchCustomers = async () => {
@@ -30,7 +30,7 @@ function Dashboard() {
 
   const handleLogout = async () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userId');  // Clear the user ID on logout
+    localStorage.removeItem('userId');
     navigate('/');
   };
 
@@ -74,7 +74,7 @@ function Dashboard() {
         lastName: formData.lastName,
         email: formData.email,
         region: formData.region,
-        userId: parseInt(userId, 10)  
+        userId: parseInt(userId, 10)
       };
 
       if (editMode) {
@@ -93,32 +93,38 @@ function Dashboard() {
       setShowForm(false);
       setFormData({ firstName: '', lastName: '', email: '', region: '' });
 
-      // Refetch customers to update the list
       const response = await api.get('/customer/loggedIn');
       setCustomers(response.data);
     } catch (error) {
       console.error('Error submitting form:', error);
     }
-};
-
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
-      <button
-        onClick={handleLogout}
-        className="absolute top-4 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
-      >
-        Logout
-      </button>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">CRM Dashboard</h2>
+        <div className='flex justify-between items-center '>
+        <div >
+      
       <button
         onClick={handleAddCustomer}
-        className="mb-4 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
+        className="mb-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
       >
         <FaPlus className="inline-block mr-2" /> Add Customer
       </button>
-      {showForm && (
-        <form onSubmit={handleFormSubmit} className="bg-white p-6 rounded-lg shadow-lg mb-6">
+        </div>
+        
+        <div> 
+      <button
+        onClick={handleLogout}
+        className="absolute top-4 mb-6 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
+      >
+        Logout
+      </button>
+        </div>
+        </div>
+       
+      <Modal isOpen={showForm} onClose={() => setShowForm(false)}>
+        <form onSubmit={handleFormSubmit} className="p-16">
           <h3 className="text-xl font-semibold mb-4">{editMode ? 'Edit Customer' : 'Add Customer'}</h3>
           <div className="mb-4">
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
@@ -171,7 +177,7 @@ function Dashboard() {
             {editMode ? 'Update' : 'Add'}
           </button>
         </form>
-      )}
+      </Modal>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
           <thead className="bg-gray-800 text-white">
