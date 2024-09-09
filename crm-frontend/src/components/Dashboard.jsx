@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import Modal from './Modal'; // Import the Modal component
-
+import Modal from './Modal'; 
 function Dashboard() {
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
@@ -12,7 +11,7 @@ function Dashboard() {
   const [currentCustomer, setCurrentCustomer] = useState(null);
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', region: '' });
   const [userId, setUserId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(''); // Arama terimini takip eden state
+  const [searchTerm, setSearchTerm] = useState(''); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,7 +22,7 @@ function Dashboard() {
       try {
         const response = await api.get('/customer/loggedIn');
         setCustomers(response.data);
-        setFilteredCustomers(response.data); // Başlangıçta tüm müşterileri göster
+        setFilteredCustomers(response.data);
       } catch (error) {
         console.error('Error fetching customers:', error);
       }
@@ -32,7 +31,6 @@ function Dashboard() {
   }, []);
 
   useEffect(() => {
-    // Arama terimi değiştiğinde müşterileri filtrele
     const filtered = customers.filter((customer) =>
       customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -136,7 +134,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Arama Alanı */}
       <div className="mb-4">
         <input
           type="text"
