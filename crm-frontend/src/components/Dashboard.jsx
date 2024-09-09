@@ -6,11 +6,13 @@ import Modal from './Modal'; // Import the Modal component
 
 function Dashboard() {
   const [customers, setCustomers] = useState([]);
+  const [filteredCustomers, setFilteredCustomers] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentCustomer, setCurrentCustomer] = useState(null);
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', region: '' });
   const [userId, setUserId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // Arama terimini takip eden state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,12 +23,24 @@ function Dashboard() {
       try {
         const response = await api.get('/customer/loggedIn');
         setCustomers(response.data);
+        setFilteredCustomers(response.data); // Başlangıçta tüm müşterileri göster
       } catch (error) {
         console.error('Error fetching customers:', error);
       }
     };
     fetchCustomers();
   }, []);
+
+  useEffect(() => {
+    // Arama terimi değiştiğinde müşterileri filtrele
+    const filtered = customers.filter((customer) =>
+      customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.region.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredCustomers(filtered);
+  }, [searchTerm, customers]);
 
   const handleLogout = async () => {
     localStorage.removeItem('token');
@@ -102,29 +116,39 @@ function Dashboard() {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen relative">
-        <div className='flex justify-between items-center '>
-        <div >
-      
-      <button
-        onClick={handleAddCustomer}
-        className="mb-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
-      >
-        <FaPlus className="inline-block mr-2" /> Add Customer
-      </button>
+      <div className="flex justify-between items-center">
+        <div>
+          <button
+            onClick={handleAddCustomer}
+            className="mb-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
+          >
+            <FaPlus className="inline-block mr-2" /> Add Customer
+          </button>
         </div>
-        
-        <div> 
-      <button
-        onClick={handleLogout}
-        className="absolute top-4 mb-6 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
-      >
-        Logout
-      </button>
+
+        <div>
+          <button
+            onClick={handleLogout}
+            className="absolute top-4 mb-6 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
+          >
+            Logout
+          </button>
         </div>
-        </div>
-       
+      </div>
+
+      {/* Arama Alanı */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search customers..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
       <Modal isOpen={showForm} onClose={() => setShowForm(false)}>
-        <form onSubmit={handleFormSubmit} >
+        <form onSubmit={handleFormSubmit}>
           <h3 className="text-xl font-semibold text-center mb-4">{editMode ? 'Edit Customer' : 'Add Customer'}</h3>
           <div className="mb-4">
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
@@ -133,7 +157,7 @@ function Dashboard() {
               type="text"
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
           </div>
@@ -144,7 +168,7 @@ function Dashboard() {
               type="text"
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
           </div>
@@ -155,7 +179,7 @@ function Dashboard() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
           </div>
@@ -166,18 +190,19 @@ function Dashboard() {
               type="text"
               value={formData.region}
               onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+            className="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700"
           >
             {editMode ? 'Update' : 'Add'}
           </button>
         </form>
       </Modal>
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
           <thead className="bg-gray-800 text-white">
@@ -190,23 +215,17 @@ function Dashboard() {
             </tr>
           </thead>
           <tbody>
-            {customers.map((customer) => (
-              <tr key={customer.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm text-gray-800">{customer.firstName}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">{customer.lastName}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">{customer.email}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">{customer.region}</td>
-                <td className="px-6 py-4 text-sm text-gray-800 flex space-x-2">
-                  <button
-                    onClick={() => handleEditCustomer(customer)}
-                    className="text-blue-500 hover:text-blue-600"
-                  >
+            {filteredCustomers.map((customer) => (
+              <tr key={customer.id} className="border-t border-gray-200">
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.firstName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.lastName}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.region}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm space-x-4">
+                  <button onClick={() => handleEditCustomer(customer)} className="text-indigo-600 hover:text-indigo-900">
                     <FaEdit />
                   </button>
-                  <button
-                    onClick={() => handleDeleteCustomer(customer.id)}
-                    className="text-red-500 hover:text-red-600"
-                  >
+                  <button onClick={() => handleDeleteCustomer(customer.id)} className="text-red-600 hover:text-red-900">
                     <FaTrash />
                   </button>
                 </td>
