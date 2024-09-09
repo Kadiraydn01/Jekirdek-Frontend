@@ -1,12 +1,15 @@
-
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LoginPage from "./components/Login.jsx";
+import Dashboard from "./components/Dashboard.jsx";
 
 function App() {
   return (
-    <div>
-      <h1 className="text-3xl flex justify-center items-center h-screen just font-bold underline">
-      Hello world!
-    </h1>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
