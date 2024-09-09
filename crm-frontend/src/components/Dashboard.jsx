@@ -54,7 +54,7 @@ function Dashboard() {
 
   const handleDeleteCustomer = async (id) => {
     try {
-      await api.delete(`/customer/delete/${id}`);
+      await api.delete(`/customer/${id}`);
       setCustomers(customers.filter(customer => customer.id !== id));
     } catch (error) {
       console.error('Error deleting customer:', error);
@@ -124,8 +124,8 @@ function Dashboard() {
         </div>
        
       <Modal isOpen={showForm} onClose={() => setShowForm(false)}>
-        <form onSubmit={handleFormSubmit} className="p-16">
-          <h3 className="text-xl font-semibold mb-4">{editMode ? 'Edit Customer' : 'Add Customer'}</h3>
+        <form onSubmit={handleFormSubmit} >
+          <h3 className="text-xl font-semibold text-center mb-4">{editMode ? 'Edit Customer' : 'Add Customer'}</h3>
           <div className="mb-4">
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
             <input
