@@ -8,26 +8,25 @@ import { jwtDecode } from 'jwt-decode';
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
+      
       const response = await api.post('user/login', { username, password });
       const token = response.data;
-  
+      
       if (token) {
-        // Decode the JWT token
+       
         const decodedToken = jwtDecode(token);
-  
-        // Assuming the userId is stored in the 'sub' field of the token
         const userId = decodedToken.userId; 
-  
-        // Store the token and userId
+         
         localStorage.setItem('token', token);
         localStorage.setItem('userId', userId);
-  
-        alert('Login successful');
+          
         navigate('/dashboard');
       } else {
         alert('Login failed');
@@ -35,6 +34,8 @@ function LoginPage() {
     } catch (error) {
       console.error('Login error:', error);
       alert('Error during login');
+    }finally {
+      setLoading(false);
     }
   };
 
@@ -69,9 +70,10 @@ function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+            disabled={loading}
+            className={`w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 ${loading ? 'opacity-50' : ''}`}
           >
-            Login
+            {loading ? 'Loading...' : 'Login'}
           </button>
         </form>
       </div>
