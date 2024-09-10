@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
-import Modal from './Modal'; 
+import Modal from './Modal';
+
 function Dashboard() {
   const [customers, setCustomers] = useState([]);
   const [filteredCustomers, setFilteredCustomers] = useState([]);
@@ -11,7 +12,8 @@ function Dashboard() {
   const [currentCustomer, setCurrentCustomer] = useState(null);
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', region: '' });
   const [userId, setUserId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState(''); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,8 +75,37 @@ function Dashboard() {
     }
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (!nameRegex.test(formData.firstName) || formData.firstName.length < 3 || formData.firstName.length > 16) {
+      newErrors.firstName = 'First name must contain only letters, be at least 3 characters, and at most 16 characters.';
+    }
+
+    if (!nameRegex.test(formData.lastName) || formData.lastName.length < 3 || formData.lastName.length > 16) {
+      newErrors.lastName = 'Last name must contain only letters, be at least 3 characters, and at most 16 characters.';
+    }
+
+    if (!nameRegex.test(formData.region) || formData.region.length < 3 || formData.region.length > 24) {
+      newErrors.region = 'Region must contain only letters, be at least 3 characters, and at most 24 characters.';
+    }
+
+    if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email address.';
+    }
+
+    return newErrors;
+  };
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     if (!userId) {
       console.error('User ID not found');
       return;
@@ -104,11 +135,17 @@ function Dashboard() {
       }
       setShowForm(false);
       setFormData({ firstName: '', lastName: '', email: '', region: '' });
+      setErrors({}); // Clear errors on successful submission
 
       const response = await api.get('/customer/loggedIn');
       setCustomers(response.data);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      if (error.response && error.response.status === 409) {
+        setErrors({ email: 'This email is already registered. Please use a different email.' });
+      } else {
+        console.error('Error submitting form:', error);
+        alert("An error occurred while submitting the form. Please try again.");
+      }
     }
   };
 
@@ -157,6 +194,7 @@ function Dashboard() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
+            {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
           </div>
           <div className="mb-4">
             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
@@ -168,6 +206,7 @@ function Dashboard() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
+            {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
           </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
@@ -179,6 +218,7 @@ function Dashboard() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
           <div className="mb-4">
             <label htmlFor="region" className="block text-sm font-medium text-gray-700">Region</label>
@@ -190,6 +230,7 @@ function Dashboard() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               required
             />
+            {errors.region && <p className="text-red-500 text-sm">{errors.region}</p>}
           </div>
           <button
             type="submit"

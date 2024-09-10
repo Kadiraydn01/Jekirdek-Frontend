@@ -1,6 +1,5 @@
-// Modal.jsx
 import React from 'react';
-import './Modal.css'; // Import your CSS file here
+import './Modal.css';
 
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
@@ -9,7 +8,7 @@ const Modal = ({ isOpen, onClose, children }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-content"
-        onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from closing it
+        onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
