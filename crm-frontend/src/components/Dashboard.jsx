@@ -14,6 +14,11 @@ function Dashboard() {
   const [userId, setUserId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [errors, setErrors] = useState({});
+  
+  const [filterFirstName, setFilterFirstName] = useState('');
+  const [filterEmail, setFilterEmail] = useState('');
+  const [filterRegion, setFilterRegion] = useState('');
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +37,22 @@ function Dashboard() {
     fetchCustomers();
   }, []);
 
+  const handleFilter = async () => {
+    try {
+      const response = await api.get(`/customer/filter`, {
+        params: {
+          firstName: filterFirstName || undefined,
+          email: filterEmail || undefined,
+          region: filterRegion || undefined,
+        },
+      });
+      setFilteredCustomers(response.data);
+    } catch (error) {
+      console.error('Error filtering customers:', error);
+    }
+  };
+
+  // Arama işlevi
   useEffect(() => {
     const filtered = customers.filter((customer) =>
       customer.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,8 +64,12 @@ function Dashboard() {
   }, [searchTerm, customers]);
 
   const handleLogout = async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userId');
+    
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+    
+
+
     navigate('/');
   };
 
@@ -77,7 +102,8 @@ function Dashboard() {
 
   const validateForm = () => {
     const newErrors = {};
-    const nameRegex = /^[A-Za-z\s]+$/;
+    const nameRegex = /^[A-Za-zÇçĞğİıĞğÖöŞşÜü\s]+$/;
+
 
     if (!nameRegex.test(formData.firstName) || formData.firstName.length < 3 || formData.firstName.length > 16) {
       newErrors.firstName = 'First name must contain only letters, be at least 3 characters, and at most 16 characters.';
@@ -135,7 +161,7 @@ function Dashboard() {
       }
       setShowForm(false);
       setFormData({ firstName: '', lastName: '', email: '', region: '' });
-      setErrors({}); // Clear errors on successful submission
+      setErrors({}); 
 
       const response = await api.get('/customer/loggedIn');
       setCustomers(response.data);
@@ -148,42 +174,94 @@ function Dashboard() {
       }
     }
   };
+  const handleClearFilters = () => {
+    setFilterFirstName('');
+    setFilterEmail('');
+    setFilterRegion('');
+  };
+  
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen relative">
-      <div className="flex justify-between items-center">
-        <div>
-          <button
-            onClick={handleAddCustomer}
-            className="mb-6 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
-          >
-            <FaPlus className="inline-block mr-2" /> Add Customer
-          </button>
-        </div>
+    <div className="p-4 bg-gray-100 min-h-screen  relative">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+    <button
+      onClick={handleAddCustomer}
+      className="mb-4 md:mb-0 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
+    >
+      <FaPlus className="inline-block mr-2" /> Add Customer
+    </button>
 
-        <div>
-          <button
-            onClick={handleLogout}
-            className="absolute top-4 mb-6 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
+    <button
+      onClick={handleLogout}
+      className="mb-4 md:absolute top-4 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
+    >
+      Logout
+    </button>
+  </div>
+  <div className="flex flex-wrap justify-center space-y-2 sm:space-y-0 w-full mb-4">
+    <div className="w-full sm:w-auto">
+      <input
+        type="text"
+        placeholder="Filter by First Name"
+        value={filterFirstName}
+        onChange={(e) => setFilterFirstName(e.target.value)}
+        className="w-full sm:w-44 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+      />
+    </div>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search customers..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
+    <div className="w-full sm:w-auto">
+      <input
+        type="text"
+        placeholder="Filter by Email"
+        value={filterEmail}
+        onChange={(e) => setFilterEmail(e.target.value)}
+        className="w-full sm:w-40 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+      />
+    </div>
+
+    <div className="w-full sm:w-auto">
+      <input
+        type="text"
+        placeholder="Filter by Region"
+        value={filterRegion}
+        onChange={(e) => setFilterRegion(e.target.value)}
+        className="w-full sm:w-40 px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+      />
+    </div>
+
+    {/* Buttons in Filter Section */}
+    <div className="w-full flex justify-center sm:space-x-2">
+      <button
+        onClick={handleClearFilters}
+        className="w-full sm:w-auto px-4 py-2 mt-2 bg-gray-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600"
+      >
+        Clear Filters
+      </button>
+
+      <button
+        onClick={handleFilter}
+        className="w-full sm:w-auto px-4 py-2 mt-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600"
+      >
+        Apply Filters
+      </button>
+    </div>
+  </div>
+
+  {/* Search Input */}
+  <div className="mb-4 w-full">
+    <input
+      type="text"
+      placeholder="Search customers..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+    />
+  </div>
 
       <Modal isOpen={showForm} onClose={() => setShowForm(false)}>
         <form onSubmit={handleFormSubmit}>
           <h3 className="text-xl font-semibold text-center mb-4">{editMode ? 'Edit Customer' : 'Add Customer'}</h3>
+          
           <div className="mb-4">
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
             <input
@@ -191,8 +269,7 @@ function Dashboard() {
               type="text"
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-              required
+              className={`w-full px-4 py-2 border ${errors.firstName ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
             />
             {errors.firstName && <p className="text-red-500 text-sm">{errors.firstName}</p>}
           </div>
@@ -203,8 +280,7 @@ function Dashboard() {
               type="text"
               value={formData.lastName}
               onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-              required
+              className={`w-full px-4 py-2 border ${errors.lastName ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
             />
             {errors.lastName && <p className="text-red-500 text-sm">{errors.lastName}</p>}
           </div>
@@ -215,65 +291,74 @@ function Dashboard() {
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-              required
+              className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
           <div className="mb-4">
             <label htmlFor="region" className="block text-sm font-medium text-gray-700">Region</label>
             <input
+
               id="region"
               type="text"
               value={formData.region}
               onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-              required
+              className={`w-full px-4 py-2 border ${errors.region ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500`}
             />
             {errors.region && <p className="text-red-500 text-sm">{errors.region}</p>}
           </div>
+
+         
+          
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700"
+            className="w-full px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600"
           >
-            {editMode ? 'Update' : 'Add'}
+            {editMode ? 'Update Customer' : 'Add Customer'}
           </button>
         </form>
       </Modal>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
-          <thead className="bg-gray-800 text-white">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold">First Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Last Name</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Email</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Region</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCustomers.map((customer) => (
-              <tr key={customer.id} className="border-t border-gray-200">
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.firstName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.lastName}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">{customer.region}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm space-x-4">
-                  <button onClick={() => handleEditCustomer(customer)} className="text-indigo-600 hover:text-indigo-900">
-                    <FaEdit />
-                  </button>
-                  <button onClick={() => handleDeleteCustomer(customer.id)} className="text-red-600 hover:text-red-900">
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  <table className="min-w-full bg-white text-left shadow-md rounded-lg overflow-hidden">
+    <thead className="bg-gray-50">
+      <tr>
+        <th className="p-2 md:p-4 whitespace-nowrap">First Name</th>
+        <th className="p-2 md:p-4 whitespace-nowrap">Last Name</th>
+        <th className="p-2 md:p-4 whitespace-nowrap">Email</th>
+        <th className="p-2 md:p-4 whitespace-nowrap">Region</th>
+        <th className="p-2 md:p-4 whitespace-nowrap">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredCustomers.map((customer) => (
+        <tr key={customer.id} className="bg-white border-t border-gray-100 hover:bg-gray-50">
+          <td className="p-2 md:p-4">{customer.firstName}</td>
+          <td className="p-2 md:p-4">{customer.lastName}</td>
+          <td className="p-2 md:p-4">{customer.email}</td>
+          <td className="p-2 md:p-4">{customer.region}</td>
+          <td className="p-2 md:p-4">
+            <button
+              onClick={() => handleEditCustomer(customer)}
+              className="text-blue-500 hover:text-blue-700 mr-2 md:mr-4"
+            >
+              <FaEdit />
+            </button>
+            <button
+              onClick={() => handleDeleteCustomer(customer.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              <FaTrash />
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
-}
+};
 
 export default Dashboard;
