@@ -251,10 +251,16 @@ function Dashboard() {
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen  relative">
-      <div className="flex justify-center sm:justify-end">
+      <div className="flex justify-between">
+        <button
+          onClick={handleAddCustomer}
+          className="hidden lg:block px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
+        >
+          <FaPlus className="inline-block mr-2" /> Add Customer
+        </button>
         <button
           onClick={handleLogout}
-          className="mb-4  top-4 right-6 px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
+          className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600"
         >
           Logout
         </button>
@@ -317,10 +323,10 @@ function Dashboard() {
           className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         />
       </div>
-      <div className="flex flex-col md:flex-row sm:justify-center md:justify-start items-center mb-4">
+      <div className="flex lg:hidden justify-center mb-4">
         <button
           onClick={handleAddCustomer}
-          className="mb-4 md:mb-0 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
+          className="px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600"
         >
           <FaPlus className="inline-block mr-2" /> Add Customer
         </button>
