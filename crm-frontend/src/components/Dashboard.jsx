@@ -43,7 +43,7 @@ function Dashboard() {
     };
     fetchCustomers();
   }, []);
-
+  //filtreleme işlevi
   const handleFilter = async () => {
     try {
       const response = await api.get(`/customer/filter`, {
@@ -71,10 +71,11 @@ function Dashboard() {
     setFilteredCustomers(filtered);
   }, [searchTerm, customers]);
 
+  //Çıkış işlevi
   const handleLogout = async () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
-    toast.success("Logout successful 👋", {
+    toast.success("Logout successful 🍀", {
       position: "top-right",
       autoClose: 1000,
       hideProgressBar: false,
@@ -83,16 +84,17 @@ function Dashboard() {
       draggable: true,
       progress: undefined,
     });
-
-    navigate("/");
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
   };
-
+  //Müşteri ekleme işlevi
   const handleAddCustomer = () => {
     setFormData({ firstName: "", lastName: "", email: "", region: "" });
     setEditMode(false);
     setShowForm(true);
   };
-
+  //Müşteri düzenleme işlevi
   const handleEditCustomer = (customer) => {
     setFormData({
       firstName: customer.firstName,
@@ -104,7 +106,7 @@ function Dashboard() {
     setEditMode(true);
     setShowForm(true);
   };
-
+  //Müşteri silme işlevi
   const handleDeleteCustomer = async (id) => {
     try {
       await api.delete(`/customer/${id}`);
@@ -122,7 +124,7 @@ function Dashboard() {
       console.error("Error deleting customer:", error);
     }
   };
-
+  //Form doğrulama işlevi
   const validateForm = () => {
     const newErrors = {};
     const nameRegex = /^[A-Za-zÇçĞğİıĞğÖöŞşÜü\s]+$/;
@@ -160,7 +162,7 @@ function Dashboard() {
 
     return newErrors;
   };
-
+  //Form gönderme işlevi
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
@@ -232,6 +234,7 @@ function Dashboard() {
       }
     }
   };
+  //Filtreleri temizleme işlevi
   const handleClearFilters = async () => {
     setFilterFirstName("");
     setFilterEmail("");
@@ -288,7 +291,6 @@ function Dashboard() {
           />
         </div>
 
-        {/* Buttons in Filter Section */}
         <div className="w-full flex justify-center sm:space-x-2">
           <button
             onClick={handleClearFilters}
@@ -306,7 +308,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Search Input */}
       <div className="mb-4 w-full">
         <input
           type="text"
