@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/api.js';
-import { jwtDecode } from 'jwt-decode';
-
-
+import {jwtDecode} from 'jwt-decode'; // jwtDecode olarak doğru isimle import
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -15,26 +15,51 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      
       const response = await api.post('user/login', { username, password });
       const token = response.data;
-      
+
       if (token) {
-       
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.userId; 
-         
+
         localStorage.setItem('token', token);
         localStorage.setItem('userId', userId);
-          
-        navigate('/dashboard');
+        
+        toast.success("Login successful 🍀", {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500); 
       } else {
-        alert('Login failed');
+        toast.error('Login failed', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('Error during login');
-    }finally {
+      toast.error('Error during login', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -76,6 +101,18 @@ function LoginPage() {
             {loading ? 'Loading...' : 'Login'}
           </button>
         </form>
+        <ToastContainer 
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </div>
     </div>
   );
